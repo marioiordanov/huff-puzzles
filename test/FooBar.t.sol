@@ -19,6 +19,14 @@ contract FooBarTest is Test, NonMatchingSelectorHelper {
         fooBar = FooBar(HuffDeployer.config().deploy("FooBar"));
     }
 
+    function testFooBarSimple() public {
+        (bool success, bytes memory returnData) = address(fooBar).call(
+            "0x00000a"
+        );
+        console.log(success);
+        console.logBytes(returnData);
+    }
+
     function testFooBar() public {
         assertEq(fooBar.foo(), 2, "Foo expected to return 2");
         assertEq(fooBar.bar(), 3, "Bar expected to return 3");
@@ -30,7 +38,11 @@ contract FooBarTest is Test, NonMatchingSelectorHelper {
         func_selectors[0] = FooBar.foo.selector;
         func_selectors[1] = FooBar.bar.selector;
 
-        bool success = nonMatchingSelectorHelper(func_selectors, callData, address(fooBar));
+        bool success = nonMatchingSelectorHelper(
+            func_selectors,
+            callData,
+            address(fooBar)
+        );
         assert(!success);
     }
 }
