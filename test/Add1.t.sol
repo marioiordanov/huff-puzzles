@@ -28,7 +28,11 @@ contract Add1Test is Test, NonMatchingSelectorHelper {
         bytes4[] memory func_selectors = new bytes4[](1);
         func_selectors[0] = Add1.add1.selector;
 
-        bool success = nonMatchingSelectorHelper(func_selectors, callData, address(add1));
+        bool success = nonMatchingSelectorHelper(
+            func_selectors,
+            callData,
+            address(add1)
+        );
         assert(!success);
     }
 }

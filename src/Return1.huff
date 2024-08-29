@@ -1,5 +1,5 @@
 
-/** 
+/**
  *  EXAMPLE HUFF EXERCISE - RETURN 1 ()
  *
  *  This huff contract simply returns 1 whenever it is called with/without data and with/without ether
@@ -7,5 +7,11 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
-    
+    0x01
+    0x00
+    mstore
+
+    0x20
+    0x00
+    return
 }

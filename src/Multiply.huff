@@ -1,9 +1,9 @@
 
-/** 
+/**
  *  MULTIPLY HUFF EXERCISE
  *
  *  When writing solidity, we most times have to perform some mathematical operations like multiplication etc
- *  
+ *
  *  The task is to write within the `MAIN` macro below, a function named `multiply` that takes in 2 uint256s, and returns their product. Be sure to revert on overflow
  *
  *  NOTICE: The contract should revert when an unrecognized function is called
@@ -13,5 +13,69 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    // Get the function selector
+    0x00
+    calldataload
+    0xE0
+    shr
 
+    // Jump to the implementation of the MULTIPLY_TWO function if the calldata matches the function selector
+    __FUNC_SIG(multiply) // 0x165c4a16
+    eq
+    multiply
+    jumpi
+
+    0x00
+    0x00
+    revert
+
+    multiply:
+        MULTIPLY_TWO()
+}
+
+#define macro MULTIPLY_TWO() = takes(0) returns(0) {
+    0x04
+    calldataload // s: [first arg]
+
+    // check if first arg is 0
+    dup1 // s: [first, first]
+    iszero // s: [0/1, first]
+    zero_multiplier
+    jumpi
+
+    0x24 // s: [0x24, first]
+    calldataload // s: [second, first]
+    // check if second arg is 0
+    dup1
+    iszero
+    zero_multiplier
+    jumpi
+
+    mul
+    dup1 //s:[product, product]
+    0x04 //s: [0x04, product, product]
+    calldataload //s: [first, product, product]
+    swap1 // s: [product, first, product]
+    div // s: [quotent, product]
+    0x24 // s: [0x24, quotent, product]
+    calldataload // s: [second, quotent, product]
+    eq // s: [true/false, product]
+    iszero
+    overflow
+    jumpi
+
+    0x00
+    mstore
+
+    0x20 0x00 return // return from memory [0x00-0x20]
+
+zero_multiplier:
+    0x00
+    0x00
+    mstore
+
+    0x20 0x00 return
+
+overflow:
+    0x11 0x00 mstore8 0x01 0x00 revert
 }
