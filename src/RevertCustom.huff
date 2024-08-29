@@ -4,7 +4,7 @@
  *
  *
  *  When a transaction is being executed within a smart contract, based on the logic of that contract, it can revert if a preset condition is not met.
- *  They're 2 main ways to revert in solidity, 
+ *  They're 2 main ways to revert in solidity,
  *  - using a string error message e,g (`require(x != 0, "Only values above 0");`)
  *  - reverting with a custom error e.g (`if(x == 0) revert OnlyValuesAbove0();`)
  *
@@ -14,5 +14,11 @@
 #define error OnlyHuff()
 
 #define macro MAIN() = takes(0) returns(0) {
-    
+    __ERROR(OnlyHuff)
+    0x00
+    mstore
+
+    0x20
+    0x00
+    revert
 }
