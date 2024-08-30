@@ -1,8 +1,8 @@
 
-/** 
+/**
  *  SUM_ARRAY HUFF EXERCISE
  *
- *  
+ *
  *  The task is to write within the `MAIN` macro below, write a functionality that takes an array of uint256 as an argument and returns the sum of all the numbers
  *
  *  NOTICE: The contract should revert when an unrecognized function is called
@@ -12,5 +12,57 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr
+    __FUNC_SIG(sumArray) eq sum_array jumpi
 
+    0x00 0x00 revert
+
+    sum_array:
+        SUM_ARRAY()
+}
+/*
+0xselector
+00 0000000000000000000000000000000000000000000000000000000000000020
+20 0000000000000000000000000000000000000000000000000000000000000003
+40 0000000000000000000000000000000000000000000000000000000000000005
+60 0000000000000000000000000000000000000000000000000000000000000006
+80 0000000000000000000000000000000000000000000000000000000000000007
+
+*/
+#define macro SUM_ARRAY() = takes(0) returns(0) {
+    // load length of array from calldata and store it in memory
+    0x24 calldataload // s:[length]
+    0x00 mstore
+
+loop:
+    // load length and check if it is zero, if zero then return what is in memory
+    0x00 mload // s:[length]
+
+    dup1 // [length, length]
+    iszero // [0/1 length]
+    end
+    jumpi
+
+    // load the element from the array at index length
+    0x20 // [0x20, length]
+    mul // [length * 0x20]
+    0x24 // [0x24, length * 0x20]
+    add // [address of element]
+    calldataload // [element]
+    0x20 mload // [el, element]
+    add
+    0x20 mstore
+    0x01 // s: [0x01]
+    0x00 mload // s: [length, 0x01]
+
+    // decrement length by 1
+    sub // [length - 1]
+    0x00 // [0x00, length - 1]
+    mstore // s: []
+    // repeat the loop
+    loop
+    jump
+
+end:
+    0x20 0x20 return
 }
