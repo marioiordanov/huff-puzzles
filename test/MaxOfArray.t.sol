@@ -7,7 +7,9 @@ import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 import {NonMatchingSelectorHelper} from "./test-utils/NonMatchingSelectorHelper.sol";
 
 interface MaxOfArray {
-    function maxOfArray(uint256[] calldata nums) external pure returns (uint256);
+    function maxOfArray(
+        uint256[] calldata nums
+    ) external pure returns (uint256);
 }
 
 contract MaxOfArrayTest is Test, NonMatchingSelectorHelper {
@@ -15,6 +17,15 @@ contract MaxOfArrayTest is Test, NonMatchingSelectorHelper {
 
     function setUp() public {
         maxOfArray = MaxOfArray(HuffDeployer.config().deploy("MaxOfArray"));
+    }
+
+    function testMaxOfArraySimple() external {
+        uint256[] memory arr = new uint256[](2);
+        arr[0] = 4;
+        arr[1] = 2;
+
+        uint256 x = maxOfArray.maxOfArray(arr);
+        console.log(x);
     }
 
     function testMaxOfArray() external {
@@ -52,7 +63,11 @@ contract MaxOfArrayTest is Test, NonMatchingSelectorHelper {
         bytes4[] memory func_selectors = new bytes4[](1);
         func_selectors[0] = MaxOfArray.maxOfArray.selector;
 
-        bool success = nonMatchingSelectorHelper(func_selectors, callData, address(maxOfArray));
+        bool success = nonMatchingSelectorHelper(
+            func_selectors,
+            callData,
+            address(maxOfArray)
+        );
         assert(!success);
     }
 }

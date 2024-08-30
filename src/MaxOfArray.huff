@@ -1,7 +1,9 @@
 
-/** 
+#include "./Console.huff"
+
+/**
  *  MAX_OF_ARRAY HUFF EXERCISE
- *  
+ *
  *  In this task, Given an abi encoded array of uint256, return its maximum value. Revert if the array is empty.
  *
  *  NOTICE: The contract should revert when an unrecognized function is called
@@ -10,5 +12,65 @@
 #define function maxOfArray(uint256[]) payable returns(uint256)
 
 #define macro MAIN() = takes(0) returns(0) {
-   
+    0x00 calldataload 0xE0 shr
+    __FUNC_SIG(maxOfArray) eq max_of_array jumpi
+
+    0x00 0x00 revert
+
+    max_of_array:
+        MAX_OF_ARRAY()
+}
+
+#define macro MAX_OF_ARRAY() = takes(0) returns(0) {
+    // load length of array from calldata and store it in memory
+    0x24 calldataload // s:[length]
+    // if length is zero, revert
+    dup1
+    iszero
+    error
+    jumpi
+
+    0x00 mstore
+
+    //LOG_MEMORY(0x00, 0x20, 0xa0)
+
+loop:
+    // load length and check if it is zero, if zero then return what is in memory
+    0x00 mload // s:[length]
+    dup1 // [length, length]
+    iszero // [0/1 length]
+    end
+    jumpi
+
+    0x20 // [0x20, length]
+    mul // [length * 0x20]
+    0x24 // [0x24, length * 0x20]
+    add // [address of element]
+    calldataload // [element]
+    dup1 // [element, element]
+    0x20 mload // [current max, element, element]
+    lt // [0/1, element]
+    if
+    jumpi
+    else jump
+if:
+    0x20 mstore
+    endif
+    jump
+else:
+    pop
+endif:
+    0x01 // s: [0x01]
+    0x00 mload // s: [length, 0x01]
+    // decrement length by 1
+    sub // [length - 1]
+    0x00 // [0x00, length - 1]
+    mstore // s: []
+    // repeat the loop
+    loop
+    jump
+end:
+    0x20 0x20 return
+error:
+    0x00 0x00 revert
 }
