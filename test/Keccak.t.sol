@@ -12,13 +12,24 @@ contract KeccakTest is Test {
         keccak = HuffDeployer.config().deploy("Keccak");
     }
 
-    function testKeccak(bytes memory data) public 
-    {
+    function testKeccakSimple() external {
+        bytes memory hello = abi.encode("hello");
+        console.logBytes(hello);
+        console.logBytes32(keccak256(hello));
+        (, bytes memory hb) = keccak.call(hello);
+        console.logBytes(hb);
+    }
+
+    function testKeccak(bytes memory data) public {
         vm.assume(data.length < 33 && data.length > 0);
         bytes32 expectedHash = keccak256(abi.encode(data));
 
         (bool success, bytes memory res) = keccak.call(abi.encode(data));
         require(success, "call failed");
-        assertEq(expectedHash, abi.decode(res, (bytes32)), "huff keccak hash != expectedHash");
+        assertEq(
+            expectedHash,
+            abi.decode(res, (bytes32)),
+            "huff keccak hash != expectedHash"
+        );
     }
 }
