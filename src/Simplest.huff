@@ -1,0 +1,4 @@
+ #define macro MAIN() = takes(0) returns(0) {
+    0xcaffe 0x00 mstore
+    0x20 0x00 return
+ }

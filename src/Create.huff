@@ -1,7 +1,8 @@
- 
-/** 
+
+#include "./Console.huff"
+/**
  *  CREATE HUFF EXERCISE
- *  
+ *
  *  The task is to deploy this contract with a function `makeContract()` which when called creates a contract
  *  that when called with any data returns `0xcaffe`.
  *  The call to `makeContract` should return the address of the newly created contract.
@@ -13,5 +14,29 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    0x00 calldataload 0xE0 shr
+    __FUNC_SIG(makeContract) eq make_contract jumpi
+
+    0x00 0x00 revert
+
+    make_contract:
+        MAKE_CONTRACT()
+ }
+
+
+ #define macro MAKE_CONTRACT() = takes(0) returns(0) {
+    0x600a8060093d393df3620caffe5f5260205ff3 0x00 // contract compiled with huffc -b
+    mstore
+    0x13 0xd 0x00 create
+
+    LOG_MEMORY(0xd, 0x13, 0xa0)
+    LOG_STACK_1(0x00)
+    0x00 mstore
+    0x20 0x00 return
+ }
+
+// 600a8060093d393df3620caffe5f5260205ff3
+ #define macro CONTRACT() = takes(0) returns(0) {
+    0xcaffe 0x00 mstore
+    0x20 0x00 return
  }
