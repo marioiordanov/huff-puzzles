@@ -18,6 +18,14 @@ contract EmitterTest is Test, NonMatchingSelectorHelper {
         emitter = Emitter(HuffDeployer.config().deploy("Emitter"));
     }
 
+    function testEmitterSimple() external {
+        (bool success, bytes memory returnData) = address(emitter).call(
+            abi.encodeWithSelector(Emitter.value.selector, 42, 24)
+        );
+        console.log(success);
+        console.logBytes(returnData);
+    }
+
     function testEmitter() public {
         vm.expectEmit(true, true, false, true);
         emit Value(42, 24);
@@ -29,7 +37,11 @@ contract EmitterTest is Test, NonMatchingSelectorHelper {
         bytes4[] memory func_selectors = new bytes4[](1);
         func_selectors[0] = Emitter.value.selector;
 
-        bool success = nonMatchingSelectorHelper(func_selectors, callData, address(emitter));
+        bool success = nonMatchingSelectorHelper(
+            func_selectors,
+            callData,
+            address(emitter)
+        );
         assert(!success);
     }
 }
