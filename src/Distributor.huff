@@ -1,7 +1,7 @@
- 
-/** 
+#include "./Console.huff"
+/**
  *  DISTRIBUTE HUFF EXERCISE
- *  
+ *
  *  The task is to enable this contract, when called with function `distribute(address[])` to
  *  distribute the value sent with the call to each address in the address array as evenly.
  *  Revert if array length is 0
@@ -14,5 +14,70 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-   
+    0x00 calldataload 0xE0 shr
+    __FUNC_SIG(distribute) eq distribute jumpi
+
+    0x00 0x00 revert
+
+    distribute:
+        DISTRIBUTE()
  }
+
+ #define macro DISTRIBUTE() = takes(0) returns(0) {
+    0x24 calldataload // s: [length]
+    dup1 // s: [length, length]
+    iszero
+    error jumpi
+    // s: [length]
+    dup1 // s: [length, length]
+    0x00 mstore // s: [length] m: [(0x00) => length]
+    callvalue // s: [msg.value, length]
+    div // [amount_per_address]
+    0x20 mstore // m: [(0x00) => length, (0x20) => amount_per_address]
+
+    loop:
+    0x00 mload // s: [length]
+
+    dup1 // [length, length]
+    iszero // [0/1 length]
+    end
+    jumpi
+
+    0x20 // [0x20, length]
+    mul // [length * 0x20]
+    0x24 // [0x24, length * 0x20]
+    add // [address of element]
+    calldataload // [element(address)]
+    0x20 mload // [amount_per_address, element]
+    swap1 // [element, amount_per_address]
+
+    SEND_ETHER()
+    pop
+
+    0x01 // s: [0x01]
+    0x00 mload // s: [length, 0x01]
+
+    sub // [length - 1]
+    0x00 mstore // s: []
+    loop jump // repeat the loop
+
+
+    0x17 0x00 mstore
+    0x20 0x00 return
+
+    end:
+        0x00 0x00 return
+
+    error:
+        0x00 0x00 revert
+ }
+
+// stack have to be [address, value]
+#define macro SEND_ETHER() = takes(2) returns(1){
+    0x00 0x00 0x00 // [0x00 0x00 0x00, address, value]
+    swap4 // [value, 0x00, 0x00, address, 0x00]
+    0x00 // [0x00, value, 0x00, 0x00, address, 0x00]
+    swap4 // [address, value, 0x00, 0x00, 0x00, 0x00]
+    gas
+    call
+}
