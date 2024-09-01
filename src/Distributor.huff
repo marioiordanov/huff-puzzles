@@ -52,7 +52,7 @@
     swap1 // [element, amount_per_address]
 
     SEND_ETHER()
-    pop
+    pop // pop the return value, because some of the contracts might not be able to receive ether
 
     0x01 // s: [0x01]
     0x00 mload // s: [length, 0x01]
