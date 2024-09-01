@@ -29,7 +29,6 @@
     0x24 calldataload
     0x00
     mstore
-    LOG_MEMORY(0x00, 0x20, 0xa0)
     __EVENT_HASH(Value)
     0x20
     0x00

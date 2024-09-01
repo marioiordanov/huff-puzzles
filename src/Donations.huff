@@ -1,6 +1,8 @@
-/** 
+#include "./Console.huff"
+
+/**
  *  DONATIONS HUFF EXERCISE
- *  
+ *
  *  The task is to Implement solidity's "receive" functionality which allows sending ether to a smart contract without any calldata
  *  also have a getter function that returns how much an address has donated. Addresses can donate several times
  */
@@ -8,5 +10,48 @@
 #define function donated(address) payable returns(uint256)
 
 #define macro MAIN() = takes(0) returns(0) {
-    
+    // create mapping(address => uint256) donations at slot 0
+    // keccak256(key.slot)
+
+    0x00 calldataload 0xE0 shr
+    __FUNC_SIG(donated) eq donated jumpi
+
+    callvalue
+    iszero
+    end
+    jumpi
+
+    caller
+    MAPPING_KEY_SLOT() // [key_slot]
+    dup1 // [key_slot, key_slot]
+
+
+    sload // [mapping[address], key_slot]
+    callvalue // [msg.value, mapping[address], key_slot]
+    add // [msg.value + mapping[address], key_slot]
+    swap1 // [key_slot, msg.value + mapping[address]]
+    sstore
+
+end:
+    0x00 0x00 return
+
+donated:
+    DONATED()
+}
+
+#define macro DONATED() = takes(0) returns(0) {
+    0x04 calldataload // [address]
+    MAPPING_KEY_SLOT()
+    sload
+    0x00 mstore
+    0x20 0x00 // [0x00, 0x20]
+    return
+}
+
+#define macro MAPPING_KEY_SLOT() = takes(1) returns(1) {
+    // already 1 item on the stack
+    0x00 mstore
+    0x1c 0x20 mstore // slot 28
+
+    0x40 0x00 sha3
 }
