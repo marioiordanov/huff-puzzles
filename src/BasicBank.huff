@@ -1,6 +1,7 @@
-/** 
+#include "./Console.huff"
+/**
  *  BASIC_BANK HUFF EXERCISE
- *  
+ *
  *  The task is to create a basic bank with huff
  * functionalities include
  *      - depositing tokens via similar to how solidity's `receive` function works
@@ -12,5 +13,85 @@
 #define function withdraw(uint256) payable returns()
 
 #define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr
+    dup1 __FUNC_SIG(balanceOf) eq balance_of jumpi
+    dup1 __FUNC_SIG(withdraw) eq withdraw_balance jumpi
 
+    RECEIVE()
+
+    balance_of:
+        BALANCE_OF()
+    withdraw_balance:
+        WITHDRAW()
+    end:
+        0x00 0x00 revert
+}
+
+#define macro RECEIVE() = takes(0) returns(0) {
+    caller
+    MAPPING_KEY_SLOT() // [key_slot]
+    dup1 // [key_slot, key_slot]
+
+
+    sload // [mapping[address], key_slot]
+    callvalue // [msg.value, mapping[address], key_slot]
+    add // [msg.value + mapping[address], key_slot]
+    swap1 // [key_slot, msg.value + mapping[address]]
+    sstore
+    0x00 0x00 return
+}
+
+#define macro BALANCE_OF() = takes(0) returns(0) {
+    0x04 calldataload // [address]
+    USER_BALANCE() // [balance]
+    0x00
+    mstore
+
+    0x20 0x00 return
+}
+
+#define macro WITHDRAW() = takes(0) returns(0) {
+    0x00 0x00 0x00 0x00
+    0x04 calldataload // [amount to withdraw, 0x00 0x00 0x00 0x00]
+    dup1 // [amount to withdraw, amount to withdraw, 0x00 0x00 0x00 0x00]
+    caller USER_BALANCE() // [balance, amount to withdraw, amount to withdraw, 0x00, 0x00, 0x00, 0x00]
+    dup1 // [balance, balance, amount to withdraw, amount to withdraw, 0x00, 0x00, 0x00, 0x00]
+    dup3 // [amount to withdraw, balance, balance, amount to widthraw, amount to withdraw, 0x00, 0x00, 0x00, 0x00]
+    gt not_enough_balance jumpi
+
+    // [balance, amount to withdraw, amount to withdraw, 0x00, 0x00, 0x00, 0x00]
+    sub // [balance - amount to withdraw, amount to withdraw, 0x00, 0x00, 0x00, 0x00]
+    caller // [address, balance - amount to withdraw, amount to withdraw, 0x00, 0x00, 0x00, 0x00]
+    MAPPING_KEY_SLOT() // [key_slot, balance - amount to withdraw, amount to widthraw, 0x00, 0x00, 0x00, 0x00]
+    sstore // [amount to withdraw, 0x00, 0x00, 0x00, 0x00]
+    caller // [address, value, argsOffset, argsSize, retOffset, retSize]
+    gas // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
+    call
+    iszero
+    transfer_error
+    jumpi
+
+    0x00 0x00 return
+
+    not_enough_balance:
+        0x20 0x00 mstore
+        0x12 0x20 mstore
+        __RIGHTPAD(0x4e6f7420656e6f7567682062616c616e6365) 0x40 mstore
+        0x60 0x00 revert
+    transfer_error:
+        0x00 0x00 revert
+}
+
+#define macro USER_BALANCE() = takes(1) returns(1) {
+    MAPPING_KEY_SLOT() // [key_slot]
+    sload
+}
+
+// get key of an address
+#define macro MAPPING_KEY_SLOT() = takes(1) returns(1) {
+    // already 1 item on the stack
+    0x00 mstore
+    0x00 0x20 mstore // slot 0
+
+    0x40 0x00 sha3
 }
