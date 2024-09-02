@@ -79,7 +79,6 @@
 
     error:
      __ERROR(ZeroArray) 0x00
-     LOG_STACK_2(0x00) mstore
 
     0x04 0x00 revert
 }
